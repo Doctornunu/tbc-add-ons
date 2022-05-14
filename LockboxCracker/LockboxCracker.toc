@@ -1,0 +1,11 @@
+## Interface: 20503
+## X-Min-Interface-BCC: 20503
+## Title: Lockbox Cracker
+## Notes: Displays a clickable Lock Pick icon next to the trade window slot when a lockbox is traded for opening.
+## Author: Michael Röhrig
+## Version: 2.5.3 build 1
+## X-Curse-Packaged-Version: 2.5.3 build 1
+## X-Curse-Project-Name: Lockbox Cracker
+## X-Curse-Project-ID: lockbox-cracker
+## X-Curse-Repository-ID: wow/lockbox-cracker/mainline
+LockboxCracker.lua

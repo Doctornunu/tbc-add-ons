@@ -1,0 +1,86 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\..\FrameXML\UI.xsd">
+ <Script File="core.lua"/>
+  
+  <Frame name="MyFrame" parent="UIParent" movable="true" enableMouse="true"  hidden = "true" inherits="BackdropTemplate">
+  <Size>
+    <AbsDimension x="700" y="350"/>
+  </Size>
+<KeyValues>
+        <KeyValue key="backdropInfo" value="BACKDROP_DIALOG_32_32" type="global"/>
+    </KeyValues>
+	<Anchors>
+    <Anchor point="CENTER"/>
+	</Anchors>
+  <Frames>
+    <ScrollFrame name="MyScrollFrame" inherits="UIPanelScrollFrameTemplate" toplevel="true" >
+      <Anchors>
+        <Anchor point="TOP">
+          <Offset>
+            <AbsDimension x="0" y="-30"/>
+          </Offset>
+        </Anchor>
+          <Anchor point="BOTTOM" >
+              <Offset>
+              <AbsDimension x="0" y="60"/>
+              </Offset>
+          </Anchor>          
+      </Anchors>
+      <Size>
+        <AbsDimension x="650" y="320"/>
+      </Size>
+      <ScrollChild>
+        <EditBox name="MyEditBox" letters="99999" multiLine="true" autoFocus="true" enableMouse="true">
+          <Size>
+            <AbsDimension x="630" y="280"/>
+          </Size>
+          <FontString inherits="ChatFontNormal"/>
+        </EditBox>
+      </ScrollChild>
+    </ScrollFrame>
+	
+	
+	<Button name = "SaveButton" inherits="UIPanelButtonTemplate" text = "Save">
+	<NormalFont style="GameFontNormalHuge"/>
+	<Anchors>
+    <Anchor point="BOTTOMLEFT" x = "350" y = "15"/>
+	</Anchors>	
+	<Size><AbsDimension x="130" y="50"/> </Size>
+	<Scripts>
+    <OnClick> 
+	save()
+	</OnClick>
+  </Scripts>
+	</Button>
+	
+	<Button name = "ExitButton" inherits="UIPanelButtonTemplate" text = "Exit">
+	<NormalFont style="GameFontNormalHuge"/>
+	<Anchors>
+    <Anchor point="BOTTOMLEFT" x = "190" y = "15"/>
+	</Anchors>	
+	<Size><AbsDimension x="130" y="50"/> </Size>
+	<Scripts>
+    <OnClick> 
+	exit()
+	</OnClick>
+  </Scripts>
+	</Button>
+	
+	
+  </Frames>
+  
+  
+  
+  
+  <Scripts>
+  <OnMouseDown>
+          if (button == "LeftButton") then
+             self:StartMoving()
+          end
+  </OnMouseDown>
+  <OnMouseUp>
+      --noinspection GlobalSelf
+      self:StopMovingOrSizing()
+  </OnMouseUp>
+  </Scripts>
+  </Frame>
+</Ui>

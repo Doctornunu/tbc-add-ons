@@ -1,0 +1,8 @@
+## Interface: 90002
+## Title: Note
+## Version: 1.7
+## Author: Wareload
+## Note: Make easy Notes ingame!
+## SavedVariablesPerCharacter: textV
+
+Frame.xml
