@@ -1,9 +1,0 @@
-## Interface: 20501
-## Title: Rippy Portraits
-## Notes: Custom player portrait with class portraits for target/ToT
-## Author: Rippy
-## DefaultState: Enabled
-## SavedVariablesPerCharacter: savedPortraitIndex
-Main.lua
-Main.xml
-ClassPortraits.lua

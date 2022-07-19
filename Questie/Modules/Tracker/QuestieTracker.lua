@@ -630,17 +630,6 @@ function _QuestieTracker:CreateTrackedQuestsFrame()
     frm:EnableMouse(true)
     frm:RegisterForDrag("LeftButton")
 
-    frm:RegisterEvent("BANKFRAME_CLOSED")
-
-    frm:SetScript("OnEvent", function(_, event, ...)
-        if (event == "BANKFRAME_CLOSED") then
-            QuestieCombatQueue:Queue(function()
-                QuestieTracker:ResetLinesForChange()
-                QuestieTracker:Update()
-            end)
-        end
-    end)
-
     frm:SetScript("OnDragStart", _QuestieTracker.OnDragStart)
     frm:SetScript("OnDragStop", _QuestieTracker.OnDragStop)
     frm:SetScript("OnEnter", _OnEnter)
@@ -684,11 +673,10 @@ function _QuestieTracker:CreateTrackedQuestItemButtons()
 
             -- Edge case to find "equipped" quest items since they will no longer be in the players bag
             if (not isFound) then
-                for j = 13, 18 do
-                    local itemID = GetInventoryItemID("player", j)
-                    local texture = GetInventoryItemTexture("player", j)
+                for inventorySlot = 1, 19 do
+                    local itemID = GetInventoryItemID("player", inventorySlot)
                     if quest.sourceItemId == itemID then
-                        validTexture = texture
+                        validTexture = GetInventoryItemTexture("player", inventorySlot)
                         isFound = true
                         break
                     end
@@ -1255,7 +1243,7 @@ function QuestieTracker:Update()
     for questId in pairs (QuestiePlayer.currentQuestlog) do
         local quest = QuestieDB:GetQuest(questId)
         if quest then
-            if quest:IsComplete() == 1 or (not quest.Objectives) or (not next(quest.Objectives)) then
+            if quest:IsComplete() == 1 or (not next(quest.Objectives)) then
                 questCompletePercent[quest.Id] = 1
             else
                 local percent = 0
@@ -1400,7 +1388,7 @@ function QuestieTracker:Update()
         end
 
         -- Look for any updated objectives since last update
-        if quest and quest.Objectives then
+        if quest then
             for _,Objective in pairs(quest.Objectives) do
                 if Objective.Update then
                     Objective:Update()
@@ -1594,7 +1582,7 @@ function QuestieTracker:Update()
                     line.label:Show()
                 end
 
-                if (quest.Objectives and complete == 0) then
+                if complete == 0 then
                     for _, objective in pairs(quest.Objectives) do
                         line = _QuestieTracker:GetNextLine()
                         if not line then break end -- stop populating the tracker
@@ -1785,29 +1773,24 @@ function QuestieTracker:Update()
                 if Questie.db.char.TrackerHiddenQuests[questId] then
                     quest.HideIcons = true
                 end
-                if Questie.db.char.TrackerFocus then
-                    if Questie.db.char.TrackerFocus and type(Questie.db.char.TrackerFocus) == "number" and Questie.db.char.TrackerFocus == quest.Id then -- quest focus
-                        QuestieTracker:FocusQuest(quest.Id)
+                if Questie.db.char.TrackerFocus and type(Questie.db.char.TrackerFocus) == "number" and Questie.db.char.TrackerFocus == quest.Id then -- quest focus
+                    QuestieTracker:FocusQuest(quest.Id)
+                end
+                for _, objective in pairs(quest.Objectives) do
+                    if Questie.db.char.TrackerHiddenObjectives[tostring(questId) .. " " .. tostring(objective.Index)] then
+                        objective.HideIcons = true
+                    end
+                    if  Questie.db.char.TrackerFocus and type(Questie.db.char.TrackerFocus) == "string" and Questie.db.char.TrackerFocus == tostring(quest.Id) .. " " .. tostring(objective.Index) then
+                        QuestieTracker:FocusObjective(quest.Id, objective.Index)
                     end
                 end
-                if quest.Objectives then
-                    for _,Objective in pairs(quest.Objectives) do
-                        if Questie.db.char.TrackerHiddenObjectives[tostring(questId) .. " " .. tostring(Objective.Index)] then
-                            Objective.HideIcons = true
-                        end
-                        if  Questie.db.char.TrackerFocus and type(Questie.db.char.TrackerFocus) == "string" and Questie.db.char.TrackerFocus == tostring(quest.Id) .. " " .. tostring(Objective.Index) then
-                            QuestieTracker:FocusObjective(quest.Id, Objective.Index)
-                        end
+
+                for _, objective in pairs(quest.SpecialObjectives) do
+                    if Questie.db.char.TrackerHiddenObjectives[tostring(questId) .. " " .. tostring(objective.Index)] then
+                        objective.HideIcons = true
                     end
-                end
-                if next(quest.SpecialObjectives) then
-                    for _, objective in pairs(quest.SpecialObjectives) do
-                        if Questie.db.char.TrackerHiddenObjectives[tostring(questId) .. " " .. tostring(objective.Index)] then
-                            objective.HideIcons = true
-                        end
-                        if  Questie.db.char.TrackerFocus and type(Questie.db.char.TrackerFocus) == "string" and Questie.db.char.TrackerFocus == tostring(quest.Id) .. " " .. tostring(objective.Index) then
-                            QuestieTracker:FocusObjective(quest.Id, objective.Index)
-                        end
+                    if  Questie.db.char.TrackerFocus and type(Questie.db.char.TrackerFocus) == "string" and Questie.db.char.TrackerFocus == tostring(quest.Id) .. " " .. tostring(objective.Index) then
+                        QuestieTracker:FocusObjective(quest.Id, objective.Index)
                     end
                 end
             end
@@ -1946,7 +1929,7 @@ function QuestieTracker:UnFocus()
 
         if quest then
             quest.FadeIcons = nil
-            if quest.Objectives then
+            if next(quest.Objectives) then
 
                 if Questie.db.char.TrackerHiddenQuests[quest.Id] then
                     quest.HideIcons = true
@@ -1966,16 +1949,13 @@ function QuestieTracker:UnFocus()
                     end
                 end
 
-                if next(quest.SpecialObjectives) then
-                    for _, objective in pairs(quest.SpecialObjectives) do
-                        if Questie.db.char.TrackerHiddenObjectives[tostring(questId) .. " " .. tostring(objective.Index)] then
-
-                            objective.HideIcons = true
-                            objective.FadeIcons = nil
-                        else
-                            objective.HideIcons = nil
-                            objective.FadeIcons = nil
-                        end
+                for _, objective in pairs(quest.SpecialObjectives) do
+                    if Questie.db.char.TrackerHiddenObjectives[tostring(questId) .. " " .. tostring(objective.Index)] then
+                        objective.HideIcons = true
+                        objective.FadeIcons = nil
+                    else
+                        objective.HideIcons = nil
+                        objective.FadeIcons = nil
                     end
                 end
             end
@@ -1993,28 +1973,26 @@ function QuestieTracker:FocusObjective(questId, objectiveIndex)
     Questie.db.char.TrackerFocus = tostring(questId) .. " " .. tostring(objectiveIndex)
     for questLogQuestId in pairs (QuestiePlayer.currentQuestlog) do
         local quest = QuestieDB:GetQuest(questLogQuestId)
-        if quest and quest.Objectives then
+        if quest and next(quest.Objectives) then
             if questLogQuestId == questId then
                 quest.HideIcons = nil
                 quest.FadeIcons = nil
 
-                for _, Objective in pairs(quest.Objectives) do
-                    if Objective.Index == objectiveIndex then
-                        Objective.HideIcons = nil
-                        Objective.FadeIcons = nil
+                for _, objective in pairs(quest.Objectives) do
+                    if objective.Index == objectiveIndex then
+                        objective.HideIcons = nil
+                        objective.FadeIcons = nil
                     else
-                        Objective.FadeIcons = true
+                        objective.FadeIcons = true
                     end
                 end
 
-                if next(quest.SpecialObjectives) then
-                    for _, objective in pairs(quest.SpecialObjectives) do
-                        if objective.Index == objectiveIndex then
-                            objective.HideIcons = nil
-                            objective.FadeIcons = nil
-                        else
-                            objective.FadeIcons = true
-                        end
+                for _, objective in pairs(quest.SpecialObjectives) do
+                    if objective.Index == objectiveIndex then
+                        objective.HideIcons = nil
+                        objective.FadeIcons = nil
+                    else
+                        objective.FadeIcons = true
                     end
                 end
 
@@ -2045,12 +2023,7 @@ end
 
 function QuestieTracker:Untrack(quest)
     Questie:Debug(Questie.DEBUG_DEVELOP, "QuestieTracker: Untrack")
-    if GetCVar("autoQuestWatch") == "0" then
-        Questie.db.char.TrackedQuests[quest.Id] = nil
-    else
-        Questie.db.char.AutoUntrackedQuests[quest.Id] = true
-    end
-    QuestieTracker:Update()
+    QuestieTracker:UntrackQuestId(quest.Id)
 end
 
 function QuestieTracker:Unhook()
@@ -2074,11 +2047,11 @@ function QuestieTracker:HookBaseTracker()
     QuestieTracker._disableHooks = nil
 
     if not QuestieTracker._alreadyHookedSecure then
-        hooksecurefunc("AutoQuestWatch_Insert", function(index, button)
-            QuestieTracker:AQW_Insert(index, button)
+        hooksecurefunc("AutoQuestWatch_Insert", function(index, watchTimer)
+            QuestieTracker:AQW_Insert(index, watchTimer)
         end)
-        hooksecurefunc("AddQuestWatch", function(index, button)
-            QuestieTracker:AQW_Insert(index, button)
+        hooksecurefunc("AddQuestWatch", function(index, watchTimer)
+            QuestieTracker:AQW_Insert(index, watchTimer)
         end)
         hooksecurefunc("RemoveQuestWatch", _RemoveQuestWatch)
 
@@ -2123,7 +2096,7 @@ end
 _OnClick = function(self, button)
     Questie:Debug(Questie.DEBUG_DEVELOP, "[QuestieTracker:_OnClick]")
     if _QuestieTracker.isMoving == true then
-        Questie:Debug(Questie.DEBUG_DEVELOP, "[QuestieTracker:_OnClick]", "Tracker is being dragged. Don't show the menu")
+        Questie:Debug(Questie.DEBUG_DEVELOP, "[QuestieTracker:_OnClick] Tracker is being dragged. Don't show the menu")
         return
     end
 
@@ -2243,42 +2216,42 @@ _RemoveQuestWatch = function(index, isQuestie)
             questId = index;
         end
         if questId then
-            if "0" == GetCVar("autoQuestWatch") then
-                Questie.db.char.TrackedQuests[questId] = nil
-            else
-                Questie.db.char.AutoUntrackedQuests[questId] = true
-            end
-
-            if Questie.db.char.hideUntrackedQuestsMapIcons then
-                -- Remove quest Icons from map when untracking quest.
-                -- Also reset caches of spawned Icons so re-tracking works.
-                QuestieMap:UnloadQuestFrames(questId)
-                local quest = QuestieDB:GetQuest(questId)
-                if quest then
-                    if quest.Objectives then
-                        for _, objective in pairs(quest.Objectives) do
-                            objective.AlreadySpawned = {}
-                        end
-                    end
-                    if next(quest.SpecialObjectives) then
-                        for _, objective in pairs(quest.SpecialObjectives) do
-                            objective.AlreadySpawned = {}
-                        end
-                    end
-                end
-            end
-
-            QuestieCombatQueue:Queue(function()
-                QuestieTracker:ResetLinesForChange()
-                QuestieTracker:Update()
-            end)
+            QuestieTracker:UntrackQuestId(questId)
         end
     end
 end
 
+function QuestieTracker:UntrackQuestId(questId)
+    if "0" == GetCVar("autoQuestWatch") then
+        Questie.db.char.TrackedQuests[questId] = nil
+    else
+        Questie.db.char.AutoUntrackedQuests[questId] = true
+    end
+
+    if Questie.db.char.hideUntrackedQuestsMapIcons then
+        -- Remove quest Icons from map when untracking quest.
+        -- Also reset caches of spawned Icons so re-tracking works.
+        QuestieMap:UnloadQuestFrames(questId)
+        local quest = QuestieDB:GetQuest(questId)
+        if quest then
+            for _, objective in pairs(quest.Objectives) do
+                objective.AlreadySpawned = {}
+            end
+            for _, objective in pairs(quest.SpecialObjectives) do
+                objective.AlreadySpawned = {}
+            end
+        end
+    end
+
+    QuestieCombatQueue:Queue(function()
+        QuestieTracker:ResetLinesForChange()
+        QuestieTracker:Update()
+    end)
+end
+
 function QuestieTracker:AQW_Insert(index, expire)
     Questie:Debug(Questie.DEBUG_DEVELOP, "QuestieTracker: AQW_Insert")
-    if QuestieTracker._disableHooks then
+    if (not Questie.db.global.trackerEnabled) or QuestieTracker._disableHooks then
         return
     end
 

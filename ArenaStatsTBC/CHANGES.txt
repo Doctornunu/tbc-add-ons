@@ -1,0 +1,10 @@
+lightweight tag 8b8fc09fe3afbe0a9a9b2f0349b2c706182f2854 0.1.5
+Author:	Denis Hamann <hamann.denis@gmail.com>
+Date:	Mon May 16 00:10:45 2022 +0200
+
+commit 8b8fc09fe3afbe0a9a9b2f0349b2c706182f2854
+Author: Denis Hamann <hamann.denis@gmail.com>
+Date:   Mon May 16 00:10:45 2022 +0200
+
+    bump version
+

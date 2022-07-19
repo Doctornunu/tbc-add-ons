@@ -1,0 +1,10 @@
+## Interface: 20501
+## Version: 1.06-Release
+## Notes: Calculate your current arena points in realtime
+## Title: |cff00cc66AP|rCalculator
+## Author: Pumpel - Gublag Golemagg EU Horde
+## SavedVariables: hideText, hideCalcButton
+
+APCalculatorConfig.lua
+APCalculatorData.lua
+APCalculatorInit.lua

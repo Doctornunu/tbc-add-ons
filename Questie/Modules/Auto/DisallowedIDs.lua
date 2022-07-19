@@ -47,6 +47,9 @@ _QuestieAuto.disallowedNPC = {
     [18253] = true, -- Archmage Leryda (Violet Eye)
     [18471] = true, -- Gurgthock (The Ring of Blood)
     [19935] = true, -- Soridormi (The Scale of Sands)
+    [19936] = true, -- Arazmodu (The Scale of Sands)
+    [25112] = true, -- Anchorite Ayuri (Shattered Sun Offensive Charity NPC)
+    [25163] = true, -- Anchorite Kairthos (Shattered Sun Offensive Title NPC)
 }
 
 _QuestieAuto.disallowedQuests = {
@@ -165,6 +168,5 @@ _QuestieAuto.disallowedQuests = {
     [8288] = true,
     -- Aldor/scryer quests
     [10551] = true,
-    [10552] = true
-
+    [10552] = true,
 }
